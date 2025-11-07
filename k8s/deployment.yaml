@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: monitor
-          image: monitor:latest
-          imagePullPolicy: Never 
+          # A imagem será atualizada automaticamente no CI/CD
+          image: luizcolli/monitor:latest   # <-- coloque seu usuário do Docker Hub aqui
+          imagePullPolicy: IfNotPresent     # <-- alterado de Never para IfNotPresent
           ports:
-          - containerPort: 3000
+            - containerPort: 3000

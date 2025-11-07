@@ -13,8 +13,15 @@ spec:
         app: monitor
     spec:
       containers:
-        - name: monitor
-          image: monitor:latest
-          imagePullPolicy: Never
-          ports:
-            - containerPort: 3000
+      - name: monitor
+        image: luizcolli/monitor:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: PROMETHEUS_ENDPOINT
+          value: "http://prometheus:9090"
+        - name: NODE_ENV
+          value: "production"
