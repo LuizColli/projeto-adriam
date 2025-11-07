@@ -1,0 +1,35 @@
+name: CD - Deploy to Minikube
+
+on:
+  push:
+    branches:
+      - main  # roda quando há push na branch principal
+    paths:
+      - "app/**"
+      - "monitor/**"
+      - "k8s/**"
+      - ".github/workflows/cd.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > ~/.kube/config
+
+      - name: Update deployment image
+        run: |
+          kubectl set image deployment/monitor monitor=${{ secrets.DOCKERHUB_USERNAME }}/monitor:latest
+          kubectl rollout restart deployment/monitor
+          kubectl rollout status deployment/monitor
