@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18.20.3-alpine
 
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
