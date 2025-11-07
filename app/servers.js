@@ -12,7 +12,7 @@ const counter = new client.Counter({
 
 app.get('/', (req, res) => {
     counter.inc();
-    res.send("Prometheus+Grafana+Kubernetes");
+    res.send("Prometheus + Grafana + Kubernetes (build atualizado)");
 });
 
 app.get('/metrics', async (req, res) => {
