@@ -3,11 +3,10 @@ name: CD - Deploy to Minikube
 on:
   push:
     branches:
-      - main  # roda quando há push na branch principal
+      - main
     paths:
-      - "app/**"
-      - "monitor/**"
       - "k8s/**"
+      - "monitor/**"
       - ".github/workflows/cd.yml"
 
 jobs:
@@ -15,21 +14,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'latest'
-
-      - name: Configure Kubeconfig
+      - name: Install Minikube
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > ~/.kube/config
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+          sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
-      - name: Update deployment image
+      - name: Start Minikube inside GitHub Actions
         run: |
-          kubectl set image deployment/monitor monitor=${{ secrets.DOCKERHUB_USERNAME }}/monitor:latest
+          minikube start --driver=docker
+          kubectl cluster-info
+
+      - name: Pull latest image from Docker Hub into Minikube
+        run: |
+          minikube image pull ${{ secrets.DOCKERHUB_USERNAME }}/monitor:latest
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/
+          kubectl get all
+
+      - name: Restart deployment
+        run: |
           kubectl rollout restart deployment/monitor
           kubectl rollout status deployment/monitor
